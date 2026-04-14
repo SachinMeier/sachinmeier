@@ -40,7 +40,9 @@
     </div>
   </div>
   <script>
-    if (localStorage.getItem('theme') === 'dark') {
+    const stored = localStorage.getItem('theme');
+    const prefersDark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (prefersDark) {
       document.documentElement.classList.add('dark');
       document.querySelector('#theme-toggle i').className = 'fas fa-sun';
     }
