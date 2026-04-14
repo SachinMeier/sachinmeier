@@ -1,0 +1,92 @@
+@font-face {
+  font-family: 'Silian Rail';
+  src: url('fonts/SilianRail.otf') format('opentype');
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Silian Rail', sans-serif;
+}
+
+:root {
+  --bg: #F9F6EE;
+  --fg: #1a1a1a;
+  --border-light: #ffffff;
+  --border-dark: #1a1a1a;
+}
+
+:root.dark {
+  --bg: #1a1a1a;
+  --fg: #F9F6EE;
+  --border-light: #33302b;
+  --border-dark: #000000;
+}
+
+body {
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--bg);
+  color: var(--fg);
+  transition: background-color 0.5s, color 0.5s;
+}
+
+a {
+  color: var(--fg);
+}
+
+.wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.card {
+  position: relative;
+  width: 322px;
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  border-top: 2px solid var(--border-light);
+  border-left: 2px solid var(--border-light);
+  border-bottom: 2px solid var(--border-dark);
+  border-right: 2px solid var(--border-dark);
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 0.75rem;
+  right: 1.5rem;
+  background: none;
+  border: none;
+  color: var(--fg);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.card:hover .theme-toggle {
+  opacity: 1;
+}
+
+.name {
+  font-size: 1.4rem;
+}
+
+.job {
+  font-size: 0.85rem;
+}
+
+.links {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 1.3rem;
+}

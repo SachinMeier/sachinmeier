@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sachin Meier</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="wrapper" class="wrapper">
+    <div id="card" class="card">
+        <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
+        <h1 class="name">Sachin Meier</h1>
+        <div class="job">Founding Software Engineer @ <a href="https://jointoolkit.com" target="_blank">Toolkit</a></div>
+        <div class="job">Previously @ <a href="https://river.com" target="_blank">River</a></div>
+        <div id="links" class="links">
+          <a id="GitHub" class="track github-purple-hover" target="_blank" href="https://github.com/SachinMeier"><i class="fab fa-github"></i></a>
+          <a id="LinkedIn" class="track linkedin-blue-hover" target="_blank" href="https://www.linkedin.com/in/sachinmeier/"><i class="fab fa-linkedin-in"></i></a>
+        </div>
+    </div>
+  </div>
+  <script>
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+      const icon = document.querySelector('#theme-toggle i');
+      const isDark = document.documentElement.classList.contains('dark');
+      icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+    }
+  </script>
+</body>
+</html>
