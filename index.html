@@ -21,11 +21,17 @@
     </div>
   </div>
   <script>
+    if (localStorage.getItem('theme') === 'dark') {
+      document.documentElement.classList.add('dark');
+      document.querySelector('#theme-toggle i').className = 'fas fa-sun';
+    }
+
     function toggleTheme() {
       document.documentElement.classList.toggle('dark');
       const icon = document.querySelector('#theme-toggle i');
       const isDark = document.documentElement.classList.contains('dark');
       icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
     }
   </script>
 </body>
