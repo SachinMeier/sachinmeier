@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Games — Sachin Meier</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <meta name="description" content="Games by Sachin Meier.">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="wrapper">
+    <div class="games-grid">
+      <a class="card game" href="https://piratescrabble.com" target="_blank">
+        <div class="game-media">
+          <img src="pirate-scrabble.png" alt="">
+          <div class="game-description">Build words. And then steal them.</div>
+        </div>
+        <div class="game-title">Pirate Scrabble</div>
+      </a>
+      <a class="card game" href="https://sachinmeier.github.io/sonar" target="_blank">
+        <div class="game-media">
+          <img src="sonar.svg" alt="">
+          <div class="game-description">Navigate your submarine through deadly waters to freedom.</div>
+        </div>
+        <div class="game-title">Sonar</div>
+      </a>
+      <a class="card game" href="#" target="_blank">
+        <div class="game-media">
+          <div class="game-placeholder">Coming Soon</div>
+          <div class="game-description">A remake of Orbit by Vertex Pop</div>
+        </div>
+        <div class="game-title">Orbit</div>
+      </a>
+      <a class="card game" href="#" target="_blank">
+        <div class="game-media">
+          <div class="game-placeholder">Coming Soon</div>
+          <div class="game-description">A boardgame style game about phalanx warfare</div>
+        </div>
+        <div class="game-title">Phalanx</div>
+      </a>
+    </div>
+  </div>
+  <script>
+    const stored = localStorage.getItem('theme');
+    const prefersDark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (prefersDark) {
+      document.documentElement.classList.add('dark');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="93 55 1014 520" preserveAspectRatio="xMidYMid slice">
+  <!-- Dark ocean background -->
+  <rect width="1200" height="630" fill="#080c14"/>
+
+  <!-- Centered sonar radar -->
+  <g transform="translate(600, 315)">
+    <!-- Grid rings (3 concentric, matching home page) -->
+    <circle r="260" fill="none" stroke="#ff3030" stroke-width="1" stroke-opacity="0.18"/>
+    <circle r="173" fill="none" stroke="#ff3030" stroke-width="1" stroke-opacity="0.18"/>
+    <circle r="87"  fill="none" stroke="#ff3030" stroke-width="1" stroke-opacity="0.18"/>
+
+    <!-- Crosshairs -->
+    <line x1="-260" y1="0" x2="260" y2="0" stroke="#ff3030" stroke-width="1" stroke-opacity="0.18"/>
+    <line x1="0" y1="-260" x2="0" y2="260" stroke="#ff3030" stroke-width="1" stroke-opacity="0.18"/>
+
+    <!-- Sweep wedge (frozen at ~2 o'clock) -->
+    <defs>
+      <radialGradient id="sweep" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#ff3030" stop-opacity="0.15"/>
+        <stop offset="100%" stop-color="#ff3030" stop-opacity="0.03"/>
+      </radialGradient>
+    </defs>
+    <path d="M0,0 L245,-90 A260,260 0 0,0 210,-155 Z" fill="url(#sweep)"/>
+
+    <!-- Sweep line -->
+    <line x1="0" y1="0" x2="245" y2="-90" stroke="#ff3030" stroke-width="1.5" stroke-opacity="0.35"/>
+
+    <!-- Radar blips (dots at various positions, some bright, some fading) -->
+    <circle cx="130" cy="-50" r="3" fill="#ff3030" opacity="0.6"/>
+    <circle cx="-95" cy="120" r="3" fill="#ff3030" opacity="0.45"/>
+    <circle cx="200" cy="-130" r="3" fill="#ff3030" opacity="0.55"/>
+    <circle cx="-160" cy="-80" r="3" fill="#ff3030" opacity="0.3"/>
+    <circle cx="50"  cy="180" r="3" fill="#ff3030" opacity="0.2"/>
+    <circle cx="-210" cy="40" r="3" fill="#ff3030" opacity="0.15"/>
+  </g>
+
+  <!-- Title: SONAR (centered) -->
+  <text x="600" y="285" font-family="monospace" font-size="52" font-weight="bold" fill="#ff0000" text-anchor="middle">SONAR</text>
+
+  <!-- Subtitle (centered) -->
+  <text x="600" y="330" font-family="monospace" font-size="18" fill="#ff6040" opacity="0.6" text-anchor="middle">NAVIGATE THE CANYON. REACH THE PORT.</text>
+
+  <!-- Vignette edges -->
+  <defs>
+    <radialGradient id="vignette" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.55"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#vignette)"/>
+</svg>
