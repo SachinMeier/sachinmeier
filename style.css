@@ -98,8 +98,16 @@ a {
 
 .links {
   display: flex;
+  align-items: center;
   gap: 1rem;
   font-size: 2rem;
+}
+
+.icon-svg {
+  height: 1.21em;
+  width: 1.21em;
+  display: block;
+  fill: currentColor;
 }
 
 @media (max-width: 600px) {
