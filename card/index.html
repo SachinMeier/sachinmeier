@@ -66,48 +66,206 @@
     </div>
   </div>
   <script>
-    // Drag the card anywhere, but never past the edge of the viewport.
+    // Drag the card anywhere (never past the viewport edge). It carries momentum after release
+    // and makes a soft whoosh whose volume and pitch follow its speed.
     (function () {
       const card = document.getElementById('card');
       let offX = 0, offY = 0;          // current offset from the resting centered position
       let startX = 0, startY = 0, baseX = 0, baseY = 0, dragging = false;
+      let vx = 0, vy = 0;              // coasting velocity, px/s
+      let coasting = false;
+      let samples = [];                // recent pointer positions for release-velocity estimate
+      let rest = null;                 // cached resting rect
 
-      function restingRect() {
-        // Measure the card where flex layout puts it, without the drag offset.
+      // --- physics tuning ---
+      const DRAG = 2.6;                // exponential decay per second (higher = stops sooner)
+      const FRICTION = 260;            // constant deceleration, px/s^2 (gives a definite stop)
+      const STOP_SPEED = 12;           // px/s below which we settle
+      const BOUNCE = 0.16;             // normal velocity kept on a wall hit (walls are not springy)
+      const WALL_GRIP = 0.6;           // sliding velocity kept along the wall on a hit
+      const MAX_SPEED = 4000;          // px/s cap on fling
+      const SAMPLE_WINDOW = 100;       // ms of pointer history used for release velocity
+
+      function measureRest() {
         const prev = card.style.transform;
         card.style.transform = 'none';
-        const r = card.getBoundingClientRect();
+        rest = card.getBoundingClientRect();
         card.style.transform = prev;
-        return r;
+        return rest;
       }
-      function clamp(x, y) {
-        const r = restingRect();
-        const minX = -r.left, maxX = window.innerWidth - r.right;
-        const minY = -r.top, maxY = window.innerHeight - r.bottom;
-        return [Math.min(maxX, Math.max(minX, x)), Math.min(maxY, Math.max(minY, y))];
+      function bounds() {
+        const r = rest || measureRest();
+        return {
+          minX: -r.left, maxX: window.innerWidth - r.right,
+          minY: -r.top,  maxY: window.innerHeight - r.bottom,
+        };
       }
-      function apply(x, y) {
-        [offX, offY] = clamp(x, y);
+      function render() {
         card.style.transform = `translate(${offX}px, ${offY}px)`;
+      }
+      function setPos(x, y) {
+        const b = bounds();
+        offX = Math.min(b.maxX, Math.max(b.minX, x));
+        offY = Math.min(b.maxY, Math.max(b.minY, y));
+        render();
+      }
+
+      // --- whoosh: looping brown noise through a resonant bandpass, gain + pitch tied to speed ---
+      let ctx = null, gain = null, filter = null, noiseBuf = null;
+      function initAudio() {
+        if (ctx) { if (ctx.state === 'suspended') ctx.resume(); return; }
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        ctx = new AC();
+        const seconds = 2;
+        const buf = ctx.createBuffer(1, ctx.sampleRate * seconds, ctx.sampleRate);
+        const d = buf.getChannelData(0);
+        let last = 0, peak = 0;
+        for (let i = 0; i < d.length; i++) {           // brown noise: leaky-integrated white noise
+          const w = Math.random() * 2 - 1;
+          last = (last + 0.02 * w) / 1.02;
+          d[i] = last;
+          peak = Math.max(peak, Math.abs(last));
+        }
+        for (let i = 0; i < d.length; i++) d[i] /= peak; // normalize so the loop seam is quiet-ish
+        noiseBuf = buf;
+        const src = ctx.createBufferSource();
+        src.buffer = buf; src.loop = true;
+        filter = ctx.createBiquadFilter();
+        filter.type = 'bandpass'; filter.Q.value = 2.4; filter.frequency.value = 160;
+        const hiss = ctx.createBiquadFilter();      // roll off anything that reads as "rubbing"
+        hiss.type = 'lowpass'; hiss.Q.value = 0.4; hiss.frequency.value = 1400;
+        gain = ctx.createGain(); gain.gain.value = 0;
+        src.connect(filter).connect(hiss).connect(gain).connect(ctx.destination);
+        src.start();
+      }
+      let smoothSpeed = 0;
+      function updateWhoosh(speed, dt) {
+        if (!gain) return;
+        // Smooth the speed so the sound swells and fades rather than stuttering.
+        const k = 1 - Math.exp(-dt * (speed > smoothSpeed ? 14 : 5));
+        smoothSpeed += (speed - smoothSpeed) * k;
+        const s = Math.min(1, smoothSpeed / 1800);
+        const vol = Math.pow(s, 1.6) * 0.16;
+        // Pitch rides with speed: a slow glide sits low (~160 Hz) and a fast one climbs
+        // toward ~900 Hz, so the tone sinks as the card loses momentum.
+        const freq = 160 + 740 * Math.pow(s, 0.7);
+        const t = ctx.currentTime;
+        gain.gain.setTargetAtTime(vol, t, 0.05);
+        filter.frequency.setTargetAtTime(freq, t, 0.06);
+      }
+      function thud(impact) {
+        // Muffled knock on a wall hit: a short burst of low-passed noise, louder for harder hits.
+        if (!ctx || impact < 80) return;
+        const amt = Math.min(1, impact / 2200);
+        const t = ctx.currentTime;
+        const src = ctx.createBufferSource();
+        src.buffer = noiseBuf;
+        const lp = ctx.createBiquadFilter();
+        lp.type = 'lowpass'; lp.Q.value = 0.5;
+        lp.frequency.setValueAtTime(140 + 260 * amt, t);
+        lp.frequency.exponentialRampToValueAtTime(70, t + 0.12);
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.1 + 0.5 * amt, t + 0.006);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.1 + 0.08 * amt);
+        src.connect(lp).connect(g).connect(ctx.destination);
+        src.start(t, Math.random() * 1.5);
+        src.stop(t + 0.25);
+      }
+      function silence() {
+        smoothSpeed = 0;
+        if (gain) gain.gain.setTargetAtTime(0, ctx.currentTime, 0.08);
+      }
+
+      // --- frame loop: runs while dragging or coasting ---
+      let rafId = 0, lastT = 0, lastX = 0, lastY = 0;
+      function tick(now) {
+        const dt = Math.min(0.05, (now - lastT) / 1000) || 0.016;
+        lastT = now;
+
+        if (coasting) {
+          // decay: exponential drag plus a constant friction term
+          const decay = Math.exp(-DRAG * dt);
+          vx *= decay; vy *= decay;
+          const sp = Math.hypot(vx, vy);
+          if (sp > 0) {
+            const f = Math.min(sp, FRICTION * dt);
+            vx -= vx / sp * f; vy -= vy / sp * f;
+          }
+          let nx = offX + vx * dt, ny = offY + vy * dt;
+          const b = bounds();
+          let hit = 0;
+          if (nx < b.minX || nx > b.maxX) {
+            nx = nx < b.minX ? b.minX : b.maxX;
+            hit = Math.abs(vx); vx = -vx * BOUNCE; vy *= WALL_GRIP;
+          }
+          if (ny < b.minY || ny > b.maxY) {
+            ny = ny < b.minY ? b.minY : b.maxY;
+            hit = Math.max(hit, Math.abs(vy)); vy = -vy * BOUNCE; vx *= WALL_GRIP;
+          }
+          if (hit > 0) thud(hit);
+          offX = nx; offY = ny; render();
+          if (Math.hypot(vx, vy) < STOP_SPEED) { coasting = false; vx = vy = 0; }
+        }
+
+        const speed = Math.hypot(offX - lastX, offY - lastY) / dt;
+        lastX = offX; lastY = offY;
+        updateWhoosh(speed, dt);
+
+        if (dragging || coasting) rafId = requestAnimationFrame(tick);
+        else { rafId = 0; silence(); }
+      }
+      function startLoop() {
+        if (rafId) return;
+        lastT = performance.now(); lastX = offX; lastY = offY;
+        rafId = requestAnimationFrame(tick);
       }
 
       card.addEventListener('pointerdown', (e) => {
         if (e.target.closest('a, button') || e.button !== 0) return;
-        dragging = true;
+        initAudio();
+        measureRest();
+        dragging = true; coasting = false; vx = vy = 0;
         startX = e.clientX; startY = e.clientY; baseX = offX; baseY = offY;
+        samples = [{ t: performance.now(), x: e.clientX, y: e.clientY }];
         card.classList.add('dragging');
         try { card.setPointerCapture(e.pointerId); } catch (err) {}
         e.preventDefault();
+        startLoop();
       });
       card.addEventListener('pointermove', (e) => {
         if (!dragging) return;
-        apply(baseX + (e.clientX - startX), baseY + (e.clientY - startY));
+        const now = performance.now();
+        samples.push({ t: now, x: e.clientX, y: e.clientY });
+        while (samples.length > 2 && now - samples[0].t > SAMPLE_WINDOW) samples.shift();
+        setPos(baseX + (e.clientX - startX), baseY + (e.clientY - startY));
       });
-      const end = () => { if (!dragging) return; dragging = false; card.classList.remove('dragging'); };
-      card.addEventListener('pointerup', end);
-      card.addEventListener('pointercancel', end);
-      card.addEventListener('lostpointercapture', end);
-      window.addEventListener('resize', () => apply(offX, offY));
+      function release() {
+        if (!dragging) return;
+        dragging = false;
+        card.classList.remove('dragging');
+        const now = performance.now();
+        const last = samples[samples.length - 1];
+        // If the pointer paused before letting go, the card was set down, not flung.
+        if (samples.length >= 2 && now - last.t < 60) {
+          const first = samples[0];
+          const dt = (last.t - first.t) / 1000;
+          if (dt > 0.008) {
+            vx = (last.x - first.x) / dt; vy = (last.y - first.y) / dt;
+            const sp = Math.hypot(vx, vy);
+            if (sp > MAX_SPEED) { vx *= MAX_SPEED / sp; vy *= MAX_SPEED / sp; }
+            coasting = sp > STOP_SPEED;
+          }
+        }
+        samples = [];
+        if (coasting) startLoop();
+      }
+      card.addEventListener('pointerup', release);
+      card.addEventListener('pointercancel', release);
+      card.addEventListener('lostpointercapture', release);
+      window.addEventListener('resize', () => { measureRest(); setPos(offX, offY); });
+      window.addEventListener('blur', () => { if (ctx) silence(); });
     })();
   </script>
 </body>

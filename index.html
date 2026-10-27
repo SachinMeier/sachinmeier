@@ -14,6 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -29,7 +30,7 @@
     :root {
       --bg: #000000; --fg: #FFFFFF;
       --ease: cubic-bezier(0.22, 1, 0.36, 1);
-      --s-50: 4px; --s-75: 8px; --s-100: 12px; --s-200: 16px; --s-300: 24px; --s-400: 32px;
+      --s-75: 8px; --s-200: 16px; --s-300: 24px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; overflow: hidden; }
@@ -37,71 +38,27 @@
     a { color: inherit; text-decoration: none; }
     :focus-visible { outline: 2px solid var(--fg); outline-offset: 3px; border-radius: 4px; }
 
-    /* Tab bar: one glass capsule, after the morpheme pills in etym, with the color taken out. */
+    /* Menu: three icons in ASCII brackets, each in its color from the globe's palette. No borders, no fill. */
     .nav {
-      --pill: #C8C8C8;
       position: fixed; top: var(--s-200); left: 50%; transform: translateX(-50%); z-index: 50;
-      display: flex; align-items: center; gap: 0; padding: 0; white-space: nowrap;
-      border-radius: 9999px; overflow: hidden;
-      background: linear-gradient(140deg,
-        color-mix(in srgb, var(--pill) 22%, rgba(255, 255, 255, 0.05)) 0%,
-        color-mix(in srgb, var(--pill) 12%, transparent) 55%,
-        color-mix(in srgb, var(--pill) 18%, rgba(255, 255, 255, 0.04)) 100%);
-      backdrop-filter: blur(20px) saturate(190%); -webkit-backdrop-filter: blur(20px) saturate(190%);
-      border: 1px solid color-mix(in srgb, var(--pill) 55%, transparent);
-      border-top-color: transparent;
-      border-bottom-color: color-mix(in srgb, var(--pill) 45%, rgba(0, 0, 0, 0.15));
-      /* Phantom top: no literal top border. The thicker inset highlight and a soft outer top glow stand in for the lit edge. */
-      box-shadow:
-        0 2px 0 rgba(255, 255, 255, 0.34) inset,
-        0 -1px 0 color-mix(in srgb, var(--pill) 35%, rgba(0, 0, 0, 0.2)) inset,
-        0 -3px 8px rgba(255, 255, 255, 0.12),
-        0 4px 14px color-mix(in srgb, var(--pill) 22%, rgba(0, 0, 0, 0.4)),
-        0 1px 2px rgba(0, 0, 0, 0.3);
-      transition: box-shadow 220ms ease;
+      display: flex; align-items: center; gap: var(--s-300); white-space: nowrap;
     }
-    /* Specular cap across the top half: the main cue that this is glass. */
-    .nav::before {
-      content: ""; position: absolute; inset: 1px 1px auto 1px; height: 52%;
-      border-radius: 9999px 9999px 40% 40%; pointer-events: none; z-index: 3;
-      background: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.08) 60%, rgba(255, 255, 255, 0));
-    }
-    /* Faint reflected light along the bottom edge. */
-    .nav::after {
-      content: ""; position: absolute; left: 12%; right: 12%; bottom: 1px; height: 1px; pointer-events: none; z-index: 3;
-      background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0));
-    }
-    .nav:hover {
-      box-shadow:
-        0 2px 0 rgba(255, 255, 255, 0.42) inset,
-        0 -1px 0 color-mix(in srgb, var(--pill) 40%, rgba(0, 0, 0, 0.2)) inset,
-        0 -4px 10px rgba(255, 255, 255, 0.16),
-        0 12px 28px color-mix(in srgb, var(--pill) 32%, rgba(0, 0, 0, 0.5)),
-        0 2px 4px rgba(0, 0, 0, 0.3);
-    }
-    /* The three links tile the capsule edge to edge, so their hover shading covers the whole area between them. */
     .nav a {
-      --mx: 50%; --my: 50%;
-      position: relative; z-index: 1; display: inline-block; overflow: hidden;
-      padding: var(--s-100) var(--s-300);
-      font-size: 1rem; line-height: 1.5rem; font-weight: 500; letter-spacing: 0.01em; color: var(--fg);
-      background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0));
-      transition: background 220ms ease;
+      display: inline-flex; align-items: center; gap: var(--s-75); padding: var(--s-75) 0;
+      font-size: 1.875rem; line-height: 1; text-decoration: none;
     }
-    .nav a:first-child { border-radius: 9999px 0 0 9999px; padding-left: var(--s-400); }
-    .nav a:last-child { border-radius: 0 9999px 9999px 0; padding-right: var(--s-400); }
-    .nav a > span { position: relative; z-index: 2; }
-    /* Hover: a glossy split fill plus a soft specular that follows the cursor, instead of a flat tint. */
-    .nav a::after {
-      content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1;
-      background: radial-gradient(circle 90px at var(--mx) var(--my), rgba(255, 255, 255, 0.36), rgba(255, 255, 255, 0) 70%);
-      opacity: 0; transition: opacity 220ms ease;
-    }
-    .nav a:hover { background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.07) 48%, rgba(255, 255, 255, 0.04) 52%, rgba(255, 255, 255, 0.1)); }
-    .nav a:hover::after { opacity: 1; }
-    .nav a:active { background: linear-gradient(to bottom, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.05) 48%, rgba(255, 255, 255, 0.03) 52%, rgba(255, 255, 255, 0.08)); }
-    .nav a:focus-visible { outline: 2px solid var(--pill); outline-offset: -3px; border-radius: 9999px; }
-    @media (max-width: 420px) { .nav a { font-size: 0.875rem; line-height: 1.25rem; padding: var(--s-100) var(--s-200); } .nav a:first-child { padding-left: var(--s-300); } .nav a:last-child { padding-right: var(--s-300); } }
+    .nav .pg { color: #D9B98C; }
+    .nav .li { color: #4F93F5; }
+    .nav .gh { color: #5CC66A; }
+    .nav a::before { content: "["; }
+    .nav a::after { content: "]"; }
+    .nav a::before, .nav a::after { opacity: 0.6; transition: opacity 200ms ease, transform 200ms ease; }
+    .nav a:hover::before { opacity: 1; transform: translateX(-4px); }
+    .nav a:hover::after { opacity: 1; transform: translateX(4px); }
+    .nav a:active::before, .nav a:active::after { transform: none; }
+    .nav a:focus-visible { outline: 1px solid var(--fg); outline-offset: 4px; }
+    .nav svg { height: 1em; width: auto; fill: currentColor; display: block; }
+    @media (prefers-reduced-motion: reduce) { .nav a:hover::before, .nav a:hover::after { transform: none; } }
 
     /* The globe fills the page */
     #ascii { position: fixed; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; }
@@ -110,20 +67,10 @@
 </head>
 <body>
   <nav class="nav" aria-label="Primary">
-    <a href="https://pirategames.org" target="_blank" rel="noreferrer"><span>Games</span></a>
-    <a href="https://github.com/SachinMeier" target="_blank" rel="noreferrer"><span>GitHub</span></a>
-    <a href="https://www.linkedin.com/in/sachinmeier/" target="_blank" rel="noreferrer"><span>LinkedIn</span></a>
+    <a class="pg" href="https://pirategames.org" target="_blank" rel="noreferrer" aria-label="Pirate Games"><svg xmlns="http://www.w3.org/2000/svg" viewBox="11 18 78 72" aria-hidden="true"><defs><path id="pS" d="M 34 20 L 55 20 C 66 20,73 25,73 33 C 73 41.5,66 46,54 46 L 53 46 L 53 79 C 54 84,56 85,61 85 L 61 87 L 31 87 L 31 85 C 36 85,41 84,41 79 L 41 27 C 40 23,38 21,34 21 Z"/><mask id="mS" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100"><rect width="100" height="100" fill="#fff"/><use href="#pS" fill="#000" stroke="#000" stroke-width="6" stroke-linejoin="round"/></mask></defs><g mask="url(#mS)"><g transform="translate(50,61) rotate(32)"><rect x="-35" y="-2.6" width="70" height="5.2" rx="2.6"/><circle cx="-35" cy="-4.2" r="5"/><circle cx="-35" cy="4.2" r="5"/><circle cx="35" cy="-4.2" r="5"/><circle cx="35" cy="4.2" r="5"/></g><g transform="translate(50,61) rotate(-32)"><rect x="-35" y="-2.6" width="70" height="5.2" rx="2.6"/><circle cx="-35" cy="-4.2" r="5"/><circle cx="-35" cy="4.2" r="5"/><circle cx="35" cy="-4.2" r="5"/><circle cx="35" cy="4.2" r="5"/></g></g><path d="M 34 20 L 55 20 C 66 20,73 25,73 33 C 73 41.5,66 46,54 46 L 53 46 L 53 79 C 54 84,56 85,61 85 L 61 87 L 31 87 L 31 85 C 36 85,41 84,41 79 L 41 27 C 40 23,38 21,34 21 Z M 55 27 L 55 40 C 60 40,65 38,65.5 33.5 C 65 29,60 27,55 27 Z"/></svg></a>
+    <a class="li" href="https://www.linkedin.com/in/sachinmeier/" target="_blank" rel="noreferrer" aria-label="LinkedIn"><i class="fab fa-linkedin-in" aria-hidden="true"></i></a>
+    <a class="gh" href="https://github.com/SachinMeier" target="_blank" rel="noreferrer" aria-label="GitHub"><i class="fab fa-github" aria-hidden="true"></i></a>
   </nav>
-  <script>
-    // The hover sheen follows the cursor inside each link.
-    document.querySelectorAll('.nav a').forEach((a) => {
-      a.addEventListener('pointermove', (e) => {
-        const r = a.getBoundingClientRect();
-        a.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100).toFixed(1) + '%');
-        a.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100).toFixed(1) + '%');
-      });
-    });
-  </script>
 
   <canvas id="ascii" role="img" aria-label="Rotating dithered ASCII globe with the name Sachin Meier fixed at its center"></canvas>
 
