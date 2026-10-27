@@ -1,6 +1,6 @@
 @font-face {
   font-family: 'Silian Rail';
-  src: url('fonts/SilianRail.otf') format('opentype');
+  src: url('../fonts/SilianRail.otf') format('opentype');
 }
 
 * {

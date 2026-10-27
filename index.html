@@ -4,10 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sachin Meier</title>
+  <meta name="description" content="Sachin Meier. Senior software engineer at River.">
+  <meta property="og:title" content="Sachin Meier">
+  <meta property="og:description" content="Senior software engineer at River.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://sachinmeier.com/">
+  <meta name="theme-color" content="#000000">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <meta name="description" content="Sachin Meier — Senior Software Engineer at River.">
-  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&display=swap">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -15,50 +21,398 @@
     "name": "Sachin Meier",
     "url": "https://sachinmeier.com",
     "jobTitle": "Senior Software Engineer",
-    "worksFor": {
-      "@type": "Organization",
-      "name": "River",
-      "url": "https://river.com"
-    },
-    "sameAs": [
-      "https://github.com/SachinMeier",
-      "https://www.linkedin.com/in/sachinmeier/"
-    ]
+    "worksFor": { "@type": "Organization", "name": "River", "url": "https://river.com" },
+    "sameAs": ["https://github.com/SachinMeier", "https://www.linkedin.com/in/sachinmeier/", "https://pirategames.org"]
   }
   </script>
+  <style>
+    :root {
+      --bg: #000000; --fg: #FFFFFF;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --s-50: 4px; --s-75: 8px; --s-100: 12px; --s-200: 16px; --s-300: 24px; --s-400: 32px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
+    body { font-family: "Geist Mono", ui-monospace, monospace; font-size: 1rem; line-height: 1.5rem; background: var(--bg); color: var(--fg); -webkit-font-smoothing: antialiased; }
+    a { color: inherit; text-decoration: none; }
+    :focus-visible { outline: 2px solid var(--fg); outline-offset: 3px; border-radius: 4px; }
+
+    /* Tab bar: one glass capsule, after the morpheme pills in etym, with the color taken out. */
+    .nav {
+      --pill: #C8C8C8;
+      position: fixed; top: var(--s-200); left: 50%; transform: translateX(-50%); z-index: 50;
+      display: flex; align-items: center; gap: 0; padding: 0; white-space: nowrap;
+      border-radius: 9999px; overflow: hidden;
+      background: linear-gradient(140deg,
+        color-mix(in srgb, var(--pill) 22%, rgba(255, 255, 255, 0.05)) 0%,
+        color-mix(in srgb, var(--pill) 12%, transparent) 55%,
+        color-mix(in srgb, var(--pill) 18%, rgba(255, 255, 255, 0.04)) 100%);
+      backdrop-filter: blur(20px) saturate(190%); -webkit-backdrop-filter: blur(20px) saturate(190%);
+      border: 1px solid color-mix(in srgb, var(--pill) 55%, transparent);
+      border-top-color: transparent;
+      border-bottom-color: color-mix(in srgb, var(--pill) 45%, rgba(0, 0, 0, 0.15));
+      /* Phantom top: no literal top border. The thicker inset highlight and a soft outer top glow stand in for the lit edge. */
+      box-shadow:
+        0 2px 0 rgba(255, 255, 255, 0.34) inset,
+        0 -1px 0 color-mix(in srgb, var(--pill) 35%, rgba(0, 0, 0, 0.2)) inset,
+        0 -3px 8px rgba(255, 255, 255, 0.12),
+        0 4px 14px color-mix(in srgb, var(--pill) 22%, rgba(0, 0, 0, 0.4)),
+        0 1px 2px rgba(0, 0, 0, 0.3);
+      transition: box-shadow 220ms ease;
+    }
+    /* Specular cap across the top half: the main cue that this is glass. */
+    .nav::before {
+      content: ""; position: absolute; inset: 1px 1px auto 1px; height: 52%;
+      border-radius: 9999px 9999px 40% 40%; pointer-events: none; z-index: 3;
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.08) 60%, rgba(255, 255, 255, 0));
+    }
+    /* Faint reflected light along the bottom edge. */
+    .nav::after {
+      content: ""; position: absolute; left: 12%; right: 12%; bottom: 1px; height: 1px; pointer-events: none; z-index: 3;
+      background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0));
+    }
+    .nav:hover {
+      box-shadow:
+        0 2px 0 rgba(255, 255, 255, 0.42) inset,
+        0 -1px 0 color-mix(in srgb, var(--pill) 40%, rgba(0, 0, 0, 0.2)) inset,
+        0 -4px 10px rgba(255, 255, 255, 0.16),
+        0 12px 28px color-mix(in srgb, var(--pill) 32%, rgba(0, 0, 0, 0.5)),
+        0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    /* The three links tile the capsule edge to edge, so their hover shading covers the whole area between them. */
+    .nav a {
+      --mx: 50%; --my: 50%;
+      position: relative; z-index: 1; display: inline-block; overflow: hidden;
+      padding: var(--s-100) var(--s-300);
+      font-size: 1rem; line-height: 1.5rem; font-weight: 500; letter-spacing: 0.01em; color: var(--fg);
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0));
+      transition: background 220ms ease;
+    }
+    .nav a:first-child { border-radius: 9999px 0 0 9999px; padding-left: var(--s-400); }
+    .nav a:last-child { border-radius: 0 9999px 9999px 0; padding-right: var(--s-400); }
+    .nav a > span { position: relative; z-index: 2; }
+    /* Hover: a glossy split fill plus a soft specular that follows the cursor, instead of a flat tint. */
+    .nav a::after {
+      content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1;
+      background: radial-gradient(circle 90px at var(--mx) var(--my), rgba(255, 255, 255, 0.36), rgba(255, 255, 255, 0) 70%);
+      opacity: 0; transition: opacity 220ms ease;
+    }
+    .nav a:hover { background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.07) 48%, rgba(255, 255, 255, 0.04) 52%, rgba(255, 255, 255, 0.1)); }
+    .nav a:hover::after { opacity: 1; }
+    .nav a:active { background: linear-gradient(to bottom, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.05) 48%, rgba(255, 255, 255, 0.03) 52%, rgba(255, 255, 255, 0.08)); }
+    .nav a:focus-visible { outline: 2px solid var(--pill); outline-offset: -3px; border-radius: 9999px; }
+    @media (max-width: 420px) { .nav a { font-size: 0.875rem; line-height: 1.25rem; padding: var(--s-100) var(--s-200); } .nav a:first-child { padding-left: var(--s-300); } .nav a:last-child { padding-right: var(--s-300); } }
+
+    /* The globe fills the page */
+    #ascii { position: fixed; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; }
+    body.dragging #ascii { cursor: grabbing; }
+  </style>
 </head>
 <body>
-  <div id="wrapper" class="wrapper">
-    <div id="card" class="card">
-        <div class="header">
-          <h1 class="name">Sachin Meier</h1>
-          <button type="button" id="theme-toggle" class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
-        </div>
-        <div class="roles">
-          <div class="job">Senior Software Engineer @ <a href="https://river.com" target="_blank">River</a></div>
-        </div>
-        <div id="links" class="links">
-          <a id="PirateGames" class="track" target="_blank" rel="noreferrer" href="https://pirategames.org" aria-label="Pirate Games"><svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="11 18 78 72" role="img" aria-hidden="true" fill="currentColor"><defs><path id="pSolid" d="M 34 20 L 55 20 C 66 20,73 25,73 33 C 73 41.5,66 46,54 46 L 53 46 L 53 79 C 54 84,56 85,61 85 L 61 87 L 31 87 L 31 85 C 36 85,41 84,41 79 L 41 27 C 40 23,38 21,34 21 Z"/><mask id="pCut" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100"><rect x="0" y="0" width="100" height="100" fill="#fff"/><use href="#pSolid" fill="#000" stroke="#000" stroke-width="6" stroke-linejoin="round"/></mask></defs><g fill="currentColor"><g mask="url(#pCut)"><g transform="translate(50,61) rotate(32)"><rect x="-35" y="-2.6" width="70" height="5.2" rx="2.6"/><circle cx="-35" cy="-4.2" r="5"/><circle cx="-35" cy="4.2" r="5"/><circle cx="35" cy="-4.2" r="5"/><circle cx="35" cy="4.2" r="5"/></g><g transform="translate(50,61) rotate(-32)"><rect x="-35" y="-2.6" width="70" height="5.2" rx="2.6"/><circle cx="-35" cy="-4.2" r="5"/><circle cx="-35" cy="4.2" r="5"/><circle cx="35" cy="-4.2" r="5"/><circle cx="35" cy="4.2" r="5"/></g></g><path fill-rule="nonzero" d="M 34 20 L 55 20 C 66 20,73 25,73 33 C 73 41.5,66 46,54 46 L 53 46 L 53 79 C 54 84,56 85,61 85 L 61 87 L 31 87 L 31 85 C 36 85,41 84,41 79 L 41 27 C 40 23,38 21,34 21 Z M 55 27 L 55 40 C 60 40,65 38,65.5 33.5 C 65 29,60 27,55 27 Z"/></g></svg></a>
-          <a id="GitHub" class="track github-purple-hover" target="_blank" rel="noreferrer" href="https://github.com/SachinMeier" aria-label="Sachin Meier on GitHub"><i class="fab fa-github"></i></a>
-          <a id="LinkedIn" class="track linkedin-blue-hover" target="_blank" rel="noreferrer" href="https://www.linkedin.com/in/sachinmeier/" aria-label="Sachin Meier on LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-        </div>
-    </div>
-  </div>
+  <nav class="nav" aria-label="Primary">
+    <a href="https://pirategames.org" target="_blank" rel="noreferrer"><span>Games</span></a>
+    <a href="https://github.com/SachinMeier" target="_blank" rel="noreferrer"><span>GitHub</span></a>
+    <a href="https://www.linkedin.com/in/sachinmeier/" target="_blank" rel="noreferrer"><span>LinkedIn</span></a>
+  </nav>
   <script>
-    const stored = localStorage.getItem('theme');
-    const prefersDark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (prefersDark) {
-      document.documentElement.classList.add('dark');
-      document.querySelector('#theme-toggle i').className = 'fas fa-sun';
+    // The hover sheen follows the cursor inside each link.
+    document.querySelectorAll('.nav a').forEach((a) => {
+      a.addEventListener('pointermove', (e) => {
+        const r = a.getBoundingClientRect();
+        a.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100).toFixed(1) + '%');
+        a.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100).toFixed(1) + '%');
+      });
+    });
+  </script>
+
+  <canvas id="ascii" role="img" aria-label="Rotating dithered ASCII globe with the name Sachin Meier fixed at its center"></canvas>
+
+  <script type="importmap">
+  { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js" } }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+
+    const out = document.getElementById('ascii');
+    const ctx = out.getContext('2d', { alpha: false });
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // The name, locked into the grid. Letters are spaced one cell apart, with an extra cell between words.
+    const NAME = 'S A C H I N  M E I E R';
+    const nameColors = new Array(NAME.length).fill('#FFFFFF');
+
+    const RAMP = ' .:+#';
+    const FONT_PX = 12;
+    const BAYER = [
+      [ 0, 32,  8, 40,  2, 34, 10, 42], [48, 16, 56, 24, 50, 18, 58, 26],
+      [12, 44,  4, 36, 14, 46,  6, 38], [60, 28, 52, 20, 62, 30, 54, 22],
+      [ 3, 35, 11, 43,  1, 33,  9, 41], [51, 19, 59, 27, 49, 17, 57, 25],
+      [15, 47,  7, 39, 13, 45,  5, 37], [63, 31, 55, 23, 61, 29, 53, 21],
+    ].map((r) => r.map((v) => (v + 0.5) / 64));
+
+    let renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false, powerPreference: 'low-power' });
+    } catch (e) {
+      throw e;
+    }
+    renderer.setPixelRatio(1);
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x000000);
+    const camera = new THREE.PerspectiveCamera(26, 1, 0.1, 50);
+    // Night side: a little ambient plus a faint camera fill so the silhouette never vanishes.
+    scene.add(new THREE.AmbientLight(0xffffff, 0.2));
+    const fill = new THREE.DirectionalLight(0xffffff, 0.12); fill.position.set(0, 0, 5); scene.add(fill);
+
+    // Two textures from NASA Blue Marble data. world.png drives character density (land bright,
+    // ocean dim). classes.png encodes a terrain class per texel in its red channel, which picks
+    // the color: three ocean depths, then green, tan, gray and white land.
+    const worldTex = new THREE.TextureLoader().load('world/world.png', () => { dirty = true; });
+    worldTex.colorSpace = THREE.SRGBColorSpace;
+    const classTex = new THREE.TextureLoader().load('world/classes.png', () => { dirty = true; });
+    classTex.colorSpace = THREE.NoColorSpace;
+    classTex.magFilter = THREE.NearestFilter; classTex.minFilter = THREE.NearestFilter; classTex.generateMipmaps = false;
+    const CLASS_STEP = 36;
+    const PALETTE = ['#2A64E0', '#4F93F5', '#93CEFF', '#5CC66A', '#D9B98C', '#A3A3A3', '#F5F5F5'];
+    // Each color at four brightness levels, night to day, so rows still draw as long runs.
+    const SHADES = [0.38, 0.58, 0.8, 1.0];
+    const SHADED = PALETTE.map((hex) => SHADES.map((f) => {
+      const n = parseInt(hex.slice(1), 16);
+      const c = (v) => Math.round(v * f).toString(16).padStart(2, '0');
+      return '#' + c(n >> 16) + c((n >> 8) & 255) + c(n & 255);
+    }));
+    // Albedo of the density texture per class, in linear light, used to recover pure illumination from the lit pass.
+    const ALBEDO = [0.223, 0.223, 0.223, 1, 1, 1, 1];
+    // City lights, drawn on the night side from the green channel of the class texture.
+    // Four brightness steps, each with its own glyph and warm color, dim amber to near white.
+    const LIGHT_RAMP = ['.', ':', '+', '#'];
+    const LIGHT_COLORS = ['#A07E3C', '#D9B45A', '#F5DC8C', '#FFF4CF'];
+    const NIGHT_START = 0.42, NIGHT_END = 0.7;   // illumination where lights are fully on, and where they are gone
+    const LIGHT_STEPS = [0.08, 0.3, 0.55, 0.8];   // glow thresholds for each ramp step; the top one is reserved for city cores
+
+    const litMat = new THREE.MeshStandardMaterial({ map: worldTex, emissive: 0xffffff, emissiveMap: worldTex, emissiveIntensity: 0.2, roughness: 0.9, metalness: 0 });
+    const classMat = new THREE.MeshBasicMaterial({ map: classTex });
+    const globe = new THREE.Mesh(new THREE.SphereGeometry(1.0, 96, 64), litMat);
+
+    // Daylight. The sun is a child of the globe, so it turns with the Earth and the terminator
+    // stays on the right geography no matter how the globe is spun. Its direction comes from the
+    // clock: solar declination from the day of the year, subsolar longitude from UTC time with
+    // the equation of time applied.
+    const sun = new THREE.DirectionalLight(0xffffff, 2.6);
+    globe.add(sun); globe.add(sun.target);
+    sun.target.position.set(0, 0, 0);
+    function sunDirection(date) {
+      const dayOfYear = Math.floor((date - Date.UTC(date.getUTCFullYear(), 0, 0)) / 86400000);
+      const decl = (23.44 * Math.PI / 180) * Math.sin(2 * Math.PI * (284 + dayOfYear) / 365);
+      const B = 2 * Math.PI * (dayOfYear - 81) / 364;
+      const eotMinutes = 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
+      const hours = date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600;
+      const lon = -15 * (hours + eotMinutes / 60 - 12) * Math.PI / 180;
+      // Map latitude and longitude onto the sphere's texture frame: u = 0 is longitude -180.
+      const theta = Math.PI / 2 - decl, phi = lon + Math.PI;
+      return new THREE.Vector3(-Math.cos(phi) * Math.sin(theta), Math.cos(theta), Math.sin(phi) * Math.sin(theta));
+    }
+    function updateSun() { sun.position.copy(sunDirection(new Date()).multiplyScalar(10)); dirty = true; }
+    scene.add(globe);
+
+    // Orientation lives in a quaternion so the globe can turn on any axis.
+    // Start tilted 23.4 degrees with the Pacific facing the camera.
+    const REST_YAW = Math.PI / 2 - 2 * Math.PI * 0.055;
+    globe.quaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 1), -23.4 * Math.PI / 180)
+      .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), REST_YAW));
+
+    // The orientation persists across reloads.
+    const POSE_KEY = 'world-pose';
+    let lastSave = 0;
+    (function restore() {
+      try {
+        const q = JSON.parse(localStorage.getItem(POSE_KEY));
+        if (Array.isArray(q) && q.length === 4 && q.every(Number.isFinite) && Math.hypot(...q) > 0.5) {
+          globe.quaternion.set(q[0], q[1], q[2], q[3]).normalize();
+        }
+      } catch (e) {}
+    })();
+    function savePose(force) {
+      const now = performance.now();
+      if (!force && now - lastSave < 1000) return;
+      lastSave = now;
+      try { localStorage.setItem(POSE_KEY, JSON.stringify(globe.quaternion.toArray())); } catch (e) {}
     }
 
-    function toggleTheme() {
-      document.documentElement.classList.toggle('dark');
-      const icon = document.querySelector('#theme-toggle i');
-      const isDark = document.documentElement.classList.contains('dark');
-      icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
-      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    const spin = new THREE.Vector3();        // inertial angular velocity, world space, radians per frame
+    const tmpQ = new THREE.Quaternion(), tmpV = new THREE.Vector3();
+    let dragging = false, lastX = 0, lastY = 0, lastT = 0, idleUntil = 0, dirty = true;
+    updateSun();
+    setInterval(updateSun, 60 * 1000);
+    const AUTO = reduced ? 0 : 0.0024;
+    const DRAG = 0.008;
+    const RAMP_MS = 2500;   // time for the idle spin to reach full speed after a drag
+    const PAUSE_MS = 300;   // quiet moment after releasing before the ramp begins
+
+    // Rotate about a world space axis by an angle
+    function turn(axisX, axisY, axisZ, angle) {
+      if (angle === 0) return;
+      tmpV.set(axisX, axisY, axisZ).normalize();
+      tmpQ.setFromAxisAngle(tmpV, angle);
+      globe.quaternion.premultiply(tmpQ);
     }
+
+    let cols = 0, rows = 0, cellW = 0, cellH = FONT_PX, rt = null, buf = null, cbuf = null, glowBuf = null, nameRow = 0, nameCol = 0;
+    // Per frame easing of a cell's city glow. Rise fast so a city core registers as it passes over a cell;
+    // fall slowly so lights fade out instead of sparkling.
+    const GLOW_RISE = 0.45, GLOW_FALL = 0.1;
+    const fontNormal = `${FONT_PX}px "Geist Mono", ui-monospace, monospace`;
+    const fontBold = `600 ${FONT_PX}px "Geist Mono", ui-monospace, monospace`;
+
+    function layout() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const w = window.innerWidth, h = window.innerHeight;
+      out.width = Math.round(w * dpr); out.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.font = fontNormal;
+      ctx.textBaseline = 'top';
+      cellW = ctx.measureText('M').width || FONT_PX * 0.6;
+      cols = Math.max(8, Math.floor(w / cellW));
+      rows = Math.max(8, Math.floor(h / cellH));
+      nameRow = Math.floor(rows / 2);
+      nameCol = Math.floor((cols - NAME.length) / 2);
+      camera.aspect = (cols * cellW) / (rows * cellH);
+      // Fit the globe (diameter 2) inside the narrower axis with a little margin.
+      const halfFov = (camera.fov / 2) * Math.PI / 180;
+      camera.position.set(0, 0, 2.9 / (2 * Math.tan(halfFov) * Math.min(camera.aspect, 1)));
+      camera.lookAt(0, 0, 0);
+      camera.updateProjectionMatrix();
+      renderer.setSize(cols, rows, false);
+      if (rt) rt.dispose();
+      rt = new THREE.WebGLRenderTarget(cols, rows, { depthBuffer: true });
+      buf = new Uint8Array(cols * rows * 4);
+      cbuf = new Uint8Array(cols * rows * 4);
+      glowBuf = new Float32Array(cols * rows);
+      dirty = true;
+    }
+
+    function draw() {
+      // Pass 1: lit globe, gives the character for each cell.
+      globe.material = litMat;
+      renderer.setRenderTarget(rt);
+      renderer.render(scene, camera);
+      renderer.readRenderTargetPixels(rt, 0, 0, cols, rows, buf);
+      // Pass 2: unlit class map, gives the color for each cell.
+      globe.material = classMat;
+      renderer.render(scene, camera);
+      renderer.readRenderTargetPixels(rt, 0, 0, cols, rows, cbuf);
+      renderer.setRenderTarget(null);
+
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, out.width, out.height);
+      ctx.font = fontNormal;
+      const levels = RAMP.length - 1;
+      for (let y = 0; y < rows; y++) {
+        const srcY = rows - 1 - y;
+        // Draw each row as runs of same colored characters.
+        let run = '', runColor = null, runStart = 0;
+        for (let x = 0; x < cols; x++) {
+          const i = (srcY * cols + x) * 4;
+          const lum = (0.2126 * buf[i] + 0.7152 * buf[i + 1] + 0.0722 * buf[i + 2]) / 255;
+          const q = Math.floor(lum * levels + BAYER[y & 7][x & 7]);
+          let c = RAMP[Math.min(levels, Math.max(0, q))];
+          const nameIdx = y === nameRow && x >= nameCol && x < nameCol + NAME.length && NAME[x - nameCol] !== ' ' ? x - nameCol : -1;
+          const onGlobe = buf[i] + buf[i + 1] + buf[i + 2] > 0;
+          let color = runColor;
+          if (c !== ' ' || (nameIdx >= 0 && onGlobe)) {
+            const cls = Math.min(PALETTE.length - 1, Math.round(cbuf[i] / CLASS_STEP));
+            const light = Math.min(1, lum / ALBEDO[cls]);
+            color = SHADED[cls][Math.min(3, Math.floor(light * 4))];
+            // Night lights fade in as the terminator passes.
+            const night = 1 - Math.min(1, Math.max(0, (light - NIGHT_START) / (NIGHT_END - NIGHT_START)));
+            // Ease each cell toward its target so lights breathe in and out instead of glittering.
+            const gi = y * cols + x;
+            const target = (cbuf[i + 1] / 255) * night, prev = glowBuf[gi];
+            const glow = glowBuf[gi] = prev + (target - prev) * (target > prev ? GLOW_RISE : GLOW_FALL);
+            if (glow > LIGHT_STEPS[0]) {
+              const k = glow > LIGHT_STEPS[3] ? 3 : glow > LIGHT_STEPS[2] ? 2 : glow > LIGHT_STEPS[1] ? 1 : 0;
+              c = LIGHT_RAMP[k]; color = LIGHT_COLORS[k];
+            }
+          }
+          if (nameIdx >= 0) {
+            // The letter takes the color of the cell beneath it, white where there is no globe.
+            nameColors[nameIdx] = onGlobe ? color : '#FFFFFF';
+            c = ' ';
+          }
+          if (color !== runColor && run.trim() !== '') {
+            ctx.fillStyle = runColor; ctx.fillText(run, runStart * cellW, y * cellH);
+            run = ''; runStart = x;
+          } else if (color !== runColor) { run = ''; runStart = x; }
+          runColor = color;
+          run += c;
+        }
+        if (run.trim() !== '') { ctx.fillStyle = runColor; ctx.fillText(run, runStart * cellW, y * cellH); }
+      }
+      ctx.font = fontBold;
+      for (let k = 0; k < NAME.length; k++) {
+        if (NAME[k] === ' ') continue;
+        ctx.fillStyle = nameColors[k] || '#FFFFFF';
+        ctx.fillText(NAME[k], (nameCol + k) * cellW, nameRow * cellH);
+      }
+    }
+
+    function tick() {
+      requestAnimationFrame(tick);
+      if (!rt || document.hidden) return;
+      const now = performance.now();
+      if (dragging) dirty = true;
+      else {
+        // Flick inertia decays on its own axis.
+        if (spin.length() > 0.0002) { turn(spin.x, spin.y, spin.z, spin.length()); spin.multiplyScalar(0.94); dirty = true; }
+        // The idle spin eases back in over RAMP_MS rather than snapping on, and blends with any leftover inertia.
+        if (AUTO && now > idleUntil) {
+          const t = Math.min(1, (now - idleUntil) / RAMP_MS);
+          const rate = AUTO * t * t * (3 - 2 * t);
+          if (rate > 0) { globe.rotateY(rate); dirty = true; }
+        }
+      }
+      if (dirty) { draw(); dirty = false; savePose(false); }
+    }
+
+    // Drag anywhere to spin the globe freely. Horizontal drag turns about the screen's
+    // vertical axis, vertical drag about its horizontal axis, and any mix in between.
+    out.addEventListener('pointerdown', (e) => {
+      dragging = true; lastX = e.clientX; lastY = e.clientY; lastT = performance.now(); spin.set(0, 0, 0);
+      document.body.classList.add('dragging'); try { out.setPointerCapture(e.pointerId); } catch (err) {}
+    });
+    out.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+      const dx = e.clientX - lastX, dy = e.clientY - lastY, now = performance.now();
+      const angle = Math.hypot(dx, dy) * DRAG;
+      if (angle > 0) {
+        turn(dy, dx, 0, angle);
+        const k = 16 / Math.max(1, now - lastT);
+        spin.set(dy, dx, 0).normalize().multiplyScalar(angle * k);
+      }
+      lastX = e.clientX; lastY = e.clientY; lastT = now;
+    });
+    const end = () => { if (!dragging) return; dragging = false; document.body.classList.remove('dragging'); idleUntil = performance.now() + PAUSE_MS; savePose(true); };
+    out.addEventListener('pointerup', end);
+    out.addEventListener('pointercancel', end);
+    out.addEventListener('lostpointercapture', end);
+    window.addEventListener('keydown', (e) => {
+      const step = 0.12;
+      if (e.key === 'ArrowLeft') turn(0, 1, 0, -step);
+      else if (e.key === 'ArrowRight') turn(0, 1, 0, step);
+      else if (e.key === 'ArrowUp') turn(1, 0, 0, -step);
+      else if (e.key === 'ArrowDown') turn(1, 0, 0, step);
+      else return;
+      idleUntil = performance.now() + PAUSE_MS; dirty = true; e.preventDefault();
+    });
+
+    document.addEventListener('visibilitychange', () => { if (document.hidden) savePose(true); });
+    window.addEventListener('pagehide', () => savePose(true));
+
+    document.fonts.load(fontBold).finally(() => {
+      layout();
+      window.addEventListener('resize', layout);
+      requestAnimationFrame(tick);
+    });
   </script>
 </body>
 </html>

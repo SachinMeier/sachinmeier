@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sachin Meier</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <meta name="description" content="Sachin Meier — Senior Software Engineer at River.">
+  <link rel="stylesheet" href="../card/style.css">
+  <style>
+    #scene { position: fixed; inset: 0; }
+    /* The wall is what gets dimmed. The placard sits above it, outside the filter, so it stays lit. */
+    #wall {
+      position: absolute; inset: 0; z-index: 0;
+      background-color: #c9955a;
+      background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABACAIAAABqVuVZAAAC9klEQVR42u2bvVHFMAzHtQwLsAAdDRtwTAAdFTUlPT0VC9CwAguwAIuQO+f8cv74S7Zlx7FzpyZ5fon9i74iK/T3/YLl6faKHTOw0O/no5GP55tF7KEVA8g/v4sEZ1hVyHCxN7aH9owBFMT39Xq3SPC65qeYyHHY+8aeX3VA7PxiGuSsM2nlQjQ7Ko4IUIcmdgI6AdWXt4frHQCxPnLr3R03j/2LIpdFbBwwhzpRDKwQOOmkMORTwxAL6UgYLbd2xgdnS34MduZ9FBPDGhTLNrYsgmMO74P8JfmqVJJ/nFHsBHQCOgElOCAt13MBtKyfFVP0mFOot/pLb+UnwllAezGAepiJmyiyKdM8gLYQCIzYBVk/GrQCElKIvakNAyi2QHIGsVeJXVfLVLvTIAAyacFaOtU7oJivmtAHXTJpOQh5CnssQMHS1cVJg8QcXJE90ycgEG2cJa9OOvuVJ7YLdHQTc7awKMmyJCYGBseenl/hlYzM8AwZ86cSB1bDJTkaVPiujw1CYi6k6PB780GscygN85O/rK6AOizBdFV+opl7fyTlJ/p5v59ZDCAwQAFQMPo6A8rvkuE+6gKyrp6lkw0RMM14SIBpKaBgOiAhpaIarCbGJsb+HfyaAIjVES2RLDL4F3AdOTKsQWjbR7IePJXYpVPX6Xf3ZKCX46vipCUzkL9GbR9ssDejgVK3iGJCZQYCunvahHmgfeTYwl75CKtBkpCX8YSwBq0+aAsMRLFU14CTGicS25UvXLaLjBHRShSq50GFiR9rsyNk0ruIll5XB5QUsxRT5/E1qBNePKBpG3+E5Scau7tHoT9ItwLfW8G0ytZzCa88QPX2SOruzatoUMbGpFYHZ1NAsfk5hy1NrA0pkrAITiK4CQfe/dS3twYxMV1lsdWiE1Cg9OEf7mNivQEC1aIGNnhsDcroD0ilSbqxs3YUC34LVph2Md9q6MbOKTLpkucQa38qpN+sS7u1D8Jf95a3kTUgdQwnPVR/0GAfl/0DjRXII4ZcbBsAAAAASUVORK5CYII=");
+      background-size: 480px 320px;
+      background-repeat: repeat;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      filter: brightness(1);
+      transition: filter 500ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    #scene.off #wall { filter: brightness(0.22); }
+    #scene .wrapper { position: relative; z-index: 1; height: 100%; }
+    /* With the lights off the placard reads as spotlit: a soft warm pool on the wall around it. */
+    #scene.off .card {
+      box-shadow: inset 4px 4px 0 #ad7c48, inset -4px -4px 0 #5e3b1b, 8px 8px 0 rgba(0, 0, 0, 0.55), 0 0 90px 36px rgba(255, 214, 150, 0.16);
+    }
+    body { background-color: #1c0f06; }
+
+    /* wooden light switch beside the placard */
+    .switch {
+      position: relative;
+      width: 56px; height: 96px;
+      margin-left: 4rem;
+      padding: 0; border: 4px solid #3e2510; cursor: pointer;
+      background-color: #8f5f31;
+      background-image: repeating-linear-gradient(180deg, rgba(40, 22, 8, 0.16) 0 3px, transparent 3px 13px);
+      box-shadow: inset 4px 4px 0 #ad7c48, inset -4px -4px 0 #5e3b1b, 8px 8px 0 rgba(0, 0, 0, 0.4);
+      flex-shrink: 0;
+      filter: brightness(1);
+      transition: filter 500ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    #scene.off .switch { filter: brightness(0.32); }
+    .switch:focus-visible { outline: 3px solid #f3d49c; outline-offset: 3px; }
+    .switch .screw {
+      position: absolute; left: 50%; width: 10px; height: 10px; margin-left: -5px;
+      background: #b86b32;
+      box-shadow: inset 2px 2px 0 #e8a66a, inset -2px -2px 0 #6e3a16;
+      clip-path: polygon(25% 0, 75% 0, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0 75%, 0 25%);
+    }
+    .switch .screw.top { top: 6px; }
+    .switch .screw.bottom { bottom: 6px; }
+    /* the slot the lever rides in */
+    .switch .slot {
+      position: absolute; left: 50%; top: 24px; width: 16px; height: 40px; margin-left: -8px;
+      background: #2a1708;
+      box-shadow: inset 2px 2px 0 #1a0e04, inset -2px -2px 0 #4a2c12;
+    }
+    /* the lever: a pixel knob that sits up for on, down for off */
+    .switch .lever {
+      position: absolute; left: 50%; top: 20px; width: 20px; height: 18px; margin-left: -10px;
+      background: #d9a76a;
+      box-shadow: inset 3px 3px 0 #f3d49c, inset -3px -3px 0 #8f5f31, 0 3px 0 #3e2510;
+      /* --pos runs 0 (up, on) to 1 (down, off) along the slot */
+      --pos: 0;
+      transform: translateY(calc(var(--pos) * 30px));
+      transition: transform 140ms steps(4, end);
+    }
+    .switch[aria-pressed="false"] .lever { --pos: 1; }
+    .switch.dragging .lever { transition: none; }
+    .switch { touch-action: none; }
+    @media (max-width: 600px) {
+      #scene .wrapper { flex-direction: column; }
+      .switch { margin: 2rem 0 0; }
+    }
+    /* wooden placard */
+    .card {
+      --fg: #f3d49c;
+      border: 4px solid #3e2510;
+      background-color: #8f5f31;
+      background-image: repeating-linear-gradient(180deg, rgba(40, 22, 8, 0.16) 0 3px, transparent 3px 13px);
+      color: var(--fg);
+      box-shadow: inset 4px 4px 0 #ad7c48, inset -4px -4px 0 #5e3b1b, 8px 8px 0 rgba(0, 0, 0, 0.4);
+      overflow: visible;
+    }
+    /* engraved text: light face, dark pixel shadow */
+    .card .name, .card .roles, .card .links {
+      filter: drop-shadow(2px 2px 0 #3e2510);
+    }
+    /* push the name down so the nail has room above it */
+    .card .header { margin-top: 1.5rem; }
+    @media (max-width: 600px) {
+      .card .header { margin-top: 1rem; }
+    }
+    /* copper nailhead, top center of the board */
+    .card .header::before {
+      content: "";
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      width: 22px;
+      height: 22px;
+      margin-left: -11px;
+      background: #b86b32;
+      /* domed head: lit top left, shaded bottom right, with a cast shadow on the board */
+      box-shadow:
+        inset 4px 4px 0 #e8a66a,
+        inset -4px -4px 0 #6e3a16,
+        inset 7px 7px 0 #d2884a,
+        inset -7px -7px 0 #8a4a1e,
+        3px 4px 0 rgba(40, 22, 8, 0.55);
+      clip-path: polygon(25% 0, 75% 0, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0 75%, 0 25%);
+      z-index: 1;
+      pointer-events: none;
+    }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Sachin Meier",
+    "url": "https://sachinmeier.com",
+    "jobTitle": "Senior Software Engineer",
+    "worksFor": {
+      "@type": "Organization",
+      "name": "River",
+      "url": "https://river.com"
+    },
+    "sameAs": [
+      "https://github.com/SachinMeier",
+      "https://www.linkedin.com/in/sachinmeier/"
+    ]
+  }
+  </script>
+</head>
+<body>
+  <div id="scene">
+  <div id="wall" aria-hidden="true"></div>
+  <div id="wrapper" class="wrapper">
+    <div id="card" class="card">
+        <div class="header">
+          <h1 class="name">Sachin Meier</h1>
+        </div>
+        <div class="roles">
+          <div class="job">Senior Software Engineer @ <a href="https://river.com" target="_blank">River</a></div>
+        </div>
+        <div id="links" class="links">
+          <a id="PirateGames" class="track" target="_blank" rel="noreferrer" href="https://pirategames.org" aria-label="Pirate Games"><svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="11 18 78 72" role="img" aria-hidden="true" fill="currentColor"><defs><path id="pSolid" d="M 34 20 L 55 20 C 66 20,73 25,73 33 C 73 41.5,66 46,54 46 L 53 46 L 53 79 C 54 84,56 85,61 85 L 61 87 L 31 87 L 31 85 C 36 85,41 84,41 79 L 41 27 C 40 23,38 21,34 21 Z"/><mask id="pCut" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100"><rect x="0" y="0" width="100" height="100" fill="#fff"/><use href="#pSolid" fill="#000" stroke="#000" stroke-width="6" stroke-linejoin="round"/></mask></defs><g fill="currentColor"><g mask="url(#pCut)"><g transform="translate(50,61) rotate(32)"><rect x="-35" y="-2.6" width="70" height="5.2" rx="2.6"/><circle cx="-35" cy="-4.2" r="5"/><circle cx="-35" cy="4.2" r="5"/><circle cx="35" cy="-4.2" r="5"/><circle cx="35" cy="4.2" r="5"/></g><g transform="translate(50,61) rotate(-32)"><rect x="-35" y="-2.6" width="70" height="5.2" rx="2.6"/><circle cx="-35" cy="-4.2" r="5"/><circle cx="-35" cy="4.2" r="5"/><circle cx="35" cy="-4.2" r="5"/><circle cx="35" cy="4.2" r="5"/></g></g><path fill-rule="nonzero" d="M 34 20 L 55 20 C 66 20,73 25,73 33 C 73 41.5,66 46,54 46 L 53 46 L 53 79 C 54 84,56 85,61 85 L 61 87 L 31 87 L 31 85 C 36 85,41 84,41 79 L 41 27 C 40 23,38 21,34 21 Z M 55 27 L 55 40 C 60 40,65 38,65.5 33.5 C 65 29,60 27,55 27 Z"/></g></svg></a>
+          <a id="LinkedIn" class="track linkedin-blue-hover" target="_blank" rel="noreferrer" href="https://www.linkedin.com/in/sachinmeier/" aria-label="Sachin Meier on LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+          <a id="GitHub" class="track github-purple-hover" target="_blank" rel="noreferrer" href="https://github.com/SachinMeier" aria-label="Sachin Meier on GitHub"><i class="fab fa-github"></i></a>
+        </div>
+    </div>
+    <button type="button" class="switch" id="light-switch" aria-pressed="true" aria-label="Light switch">
+      <span class="screw top"></span>
+      <span class="slot"></span>
+      <span class="lever"></span>
+      <span class="screw bottom"></span>
+    </button>
+  </div>
+  </div>
+  <script>
+    const scene = document.getElementById('scene');
+    const lightSwitch = document.getElementById('light-switch');
+    const lever = lightSwitch.querySelector('.lever');
+    const TRAVEL = 30;   // px the lever moves between on and off
+    // A soft wooden click, synthesized so there is no audio file to load: a low damped thump
+    // from a sine that falls in pitch, plus a very short band passed noise tick for the snap.
+    let audio = null;
+    function tock(on) {
+      try {
+        if (!audio) audio = new (window.AudioContext || window.webkitAudioContext)();
+        if (audio.state === 'suspended') audio.resume();
+        const t = audio.currentTime;
+        const out = audio.createGain(); out.gain.value = 0.9; out.connect(audio.destination);
+
+        const thump = audio.createOscillator(); thump.type = 'sine';
+        const f0 = on ? 260 : 210;
+        thump.frequency.setValueAtTime(f0, t);
+        thump.frequency.exponentialRampToValueAtTime(f0 * 0.45, t + 0.08);
+        const thumpGain = audio.createGain();
+        thumpGain.gain.setValueAtTime(0.0001, t);
+        thumpGain.gain.exponentialRampToValueAtTime(0.5, t + 0.004);
+        thumpGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+        thump.connect(thumpGain).connect(out);
+        thump.start(t); thump.stop(t + 0.14);
+
+        const len = Math.floor(audio.sampleRate * 0.03);
+        const buf = audio.createBuffer(1, len, audio.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / len);
+        const tick = audio.createBufferSource(); tick.buffer = buf;
+        const band = audio.createBiquadFilter(); band.type = 'bandpass'; band.frequency.value = on ? 1900 : 1500; band.Q.value = 1.2;
+        const tickGain = audio.createGain();
+        tickGain.gain.setValueAtTime(0.22, t);
+        tickGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.03);
+        tick.connect(band).connect(tickGain).connect(out);
+        tick.start(t); tick.stop(t + 0.035);
+      } catch (e) {}
+    }
+
+    function setLight(on, silent) {
+      scene.classList.toggle('off', !on);
+      lightSwitch.setAttribute('aria-pressed', String(on));
+      lightSwitch.setAttribute('aria-label', on ? 'Turn the light off' : 'Turn the light on');
+      try { localStorage.setItem('pixel-light', on ? 'on' : 'off'); } catch (e) {}
+      if (!silent) tock(on);
+    }
+    const isOn = () => lightSwitch.getAttribute('aria-pressed') === 'true';
+    let saved = null;
+    try { saved = localStorage.getItem('pixel-light'); } catch (e) {}
+    if (saved === 'off') setLight(false, true);
+
+    // Drag the lever along the slot. The light flips as it crosses the midpoint; on release the
+    // lever snaps to the end that matches the light. A plain click flips it and animates across.
+    let dragging = false, moved = false, startY = 0, startPos = 0;
+    lightSwitch.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0) return;
+      dragging = true; moved = false; startY = e.clientY; startPos = isOn() ? 0 : 1;
+      try { lightSwitch.setPointerCapture(e.pointerId); } catch (err) {}
+      e.preventDefault();
+    });
+    lightSwitch.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+      const dy = e.clientY - startY;
+      if (!moved && Math.abs(dy) < 3) return;
+      if (!moved) { moved = true; lightSwitch.classList.add('dragging'); }
+      const pos = Math.min(1, Math.max(0, startPos + dy / TRAVEL));
+      lever.style.setProperty('--pos', pos.toFixed(3));
+      const shouldBeOn = pos < 0.5;
+      if (shouldBeOn !== isOn()) setLight(shouldBeOn);
+    });
+    const release = () => {
+      if (!dragging) return;
+      dragging = false;
+      lightSwitch.classList.remove('dragging');
+      if (moved) lever.style.removeProperty('--pos');   // snap to the end the state dictates
+    };
+    lightSwitch.addEventListener('pointerup', release);
+    lightSwitch.addEventListener('pointercancel', release);
+    lightSwitch.addEventListener('lostpointercapture', release);
+    lightSwitch.addEventListener('click', () => { if (!moved) setLight(!isOn()); moved = false; });
+    lightSwitch.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowUp') { setLight(true); e.preventDefault(); }
+      if (e.key === 'ArrowDown') { setLight(false); e.preventDefault(); }
+    });
+  </script>
+</body>
+</html>
