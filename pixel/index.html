@@ -30,9 +30,12 @@
     }
     body { background-color: #1c0f06; }
 
-    /* wooden light switch beside the placard */
+    /* wooden light switch beside the placard. It is anchored to the placard's right edge so the placard
+       alone is what gets centered in the viewport. */
     .switch {
-      position: relative;
+      position: absolute;
+      left: 100%; top: 50%;
+      transform: translateY(-50%);
       width: 56px; height: 96px;
       margin-left: 4rem;
       padding: 0; border: 4px solid #3e2510; cursor: pointer;
@@ -73,8 +76,7 @@
     .switch.dragging .lever { transition: none; }
     .switch { touch-action: none; }
     @media (max-width: 600px) {
-      #scene .wrapper { flex-direction: column; }
-      .switch { margin: 2rem 0 0; }
+      .switch { left: 50%; top: 100%; transform: translateX(-50%); margin: 2rem 0 0; }
     }
     /* wooden placard */
     .card {
@@ -152,13 +154,13 @@
           <a id="LinkedIn" class="track linkedin-blue-hover" target="_blank" rel="noreferrer" href="https://www.linkedin.com/in/sachinmeier/" aria-label="Sachin Meier on LinkedIn"><i class="fab fa-linkedin-in"></i></a>
           <a id="GitHub" class="track github-purple-hover" target="_blank" rel="noreferrer" href="https://github.com/SachinMeier" aria-label="Sachin Meier on GitHub"><i class="fab fa-github"></i></a>
         </div>
+        <button type="button" class="switch" id="light-switch" aria-pressed="true" aria-label="Light switch">
+          <span class="screw top"></span>
+          <span class="slot"></span>
+          <span class="lever"></span>
+          <span class="screw bottom"></span>
+        </button>
     </div>
-    <button type="button" class="switch" id="light-switch" aria-pressed="true" aria-label="Light switch">
-      <span class="screw top"></span>
-      <span class="slot"></span>
-      <span class="lever"></span>
-      <span class="screw bottom"></span>
-    </button>
   </div>
   </div>
   <script>
