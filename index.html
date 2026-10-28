@@ -72,7 +72,7 @@
     <a class="gh" href="https://github.com/SachinMeier" target="_blank" rel="noreferrer" aria-label="GitHub"><i class="fab fa-github" aria-hidden="true"></i></a>
   </nav>
 
-  <canvas id="ascii" role="img" aria-label="Rotating dithered ASCII globe with the name Sachin Meier fixed at its center"></canvas>
+  <canvas id="ascii" role="img" aria-label="Rotating dithered ASCII globe with an orbiting moon and the name Sachin Meier fixed at its center"></canvas>
 
   <script type="importmap">
   { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js" } }
@@ -120,7 +120,9 @@
     classTex.colorSpace = THREE.NoColorSpace;
     classTex.magFilter = THREE.NearestFilter; classTex.minFilter = THREE.NearestFilter; classTex.generateMipmaps = false;
     const CLASS_STEP = 36;
-    const PALETTE = ['#2A64E0', '#4F93F5', '#93CEFF', '#5CC66A', '#D9B98C', '#A3A3A3', '#F5F5F5'];
+    // The last class is the moon, which has no texel in classes.png and is painted by its own material.
+    const PALETTE = ['#2A64E0', '#4F93F5', '#93CEFF', '#5CC66A', '#D9B98C', '#A3A3A3', '#F5F5F5', '#CFCAC0'];
+    const MOON_CLASS = PALETTE.length - 1;
     // Each color at four brightness levels, night to day, so rows still draw as long runs.
     const SHADES = [0.38, 0.58, 0.8, 1.0];
     const SHADED = PALETTE.map((hex) => SHADES.map((f) => {
@@ -129,7 +131,7 @@
       return '#' + c(n >> 16) + c((n >> 8) & 255) + c(n & 255);
     }));
     // Albedo of the density texture per class, in linear light, used to recover pure illumination from the lit pass.
-    const ALBEDO = [0.223, 0.223, 0.223, 1, 1, 1, 1];
+    const ALBEDO = [0.223, 0.223, 0.223, 1, 1, 1, 1, 1];
     // City lights, drawn on the night side from the green channel of the class texture.
     // Four brightness steps, each with its own glyph and warm color, dim amber to near white.
     const LIGHT_RAMP = ['.', ':', '+', '#'];
@@ -155,12 +157,124 @@
       const eotMinutes = 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
       const hours = date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600;
       const lon = -15 * (hours + eotMinutes / 60 - 12) * Math.PI / 180;
-      // Map latitude and longitude onto the sphere's texture frame: u = 0 is longitude -180.
-      const theta = Math.PI / 2 - decl, phi = lon + Math.PI;
+      return latLonToVector(decl, lon);
+    }
+    // Map latitude and longitude (radians, east positive) onto the sphere's texture frame: u = 0 is longitude -180.
+    function latLonToVector(lat, lon) {
+      const theta = Math.PI / 2 - lat, phi = lon + Math.PI;
       return new THREE.Vector3(-Math.cos(phi) * Math.sin(theta), Math.cos(theta), Math.sin(phi) * Math.sin(theta));
     }
     function updateSun() { sun.position.copy(sunDirection(new Date()).multiplyScalar(10)); dirty = true; }
     scene.add(globe);
+
+    // The moon. Like the sun it is a child of the globe, so it keeps its place over the right
+    // geography as the globe is spun, and the same sunlight gives it the right phase. Its
+    // direction comes from a low precision lunar ephemeris: ecliptic longitude and latitude from
+    // the date, tilted onto the equator, then turned into Earth-fixed longitude with sidereal
+    // time. The orbit therefore runs along the ecliptic, 18 to 29 degrees off the equator,
+    // rather than around the equator. The orbit radius is compressed to fit the screen, and the
+    // moon's clock runs fast so the orbit is visible: one orbit takes SPINS_PER_ORBIT turns of
+    // the globe's idle spin. The real Earth turns about 27.3 times per lunar orbit.
+    const AUTO = reduced ? 0 : 0.0024;              // idle spin, radians per frame
+    const SPIN_S = 2 * Math.PI / 0.0024 / 60;       // seconds per idle turn at 60 fps, about 44
+    const SPINS_PER_ORBIT = 2;
+    const MOON_R = 0.2;             // relative to Earth; the true ratio is 0.27
+    const MOON_ORBIT = 1.45;        // true value is about 60; this one keeps it on screen
+    const MOON_PERIOD_S = SPINS_PER_ORBIT * SPIN_S;
+    const MOON_SPEEDUP = reduced ? 1 : 27.32 * 86400 / MOON_PERIOD_S;
+    const DEG = Math.PI / 180, J2000 = Date.UTC(2000, 0, 1, 12);
+    // The orbit (longitude, latitude) is evaluated on the fast clock, but the Earth's own turn
+    // relative to the stars (sidereal time) uses the real clock, so speeding the moon up does
+    // not also spin it around the globe once per simulated day.
+    function moonDirection(orbitDate, realDate) {
+      const D = (orbitDate - J2000) / 86400000;             // days since J2000
+      const L = (218.316 + 13.176396 * D) * DEG;            // mean longitude
+      const M = (134.963 + 13.064993 * D) * DEG;            // mean anomaly
+      const F = (93.272 + 13.229350 * D) * DEG;             // argument of latitude
+      const lambda = L + 6.289 * DEG * Math.sin(M);         // ecliptic longitude
+      const beta = 5.128 * DEG * Math.sin(F);               // ecliptic latitude, from the 5.1 degree inclination
+      // Ecliptic to equatorial.
+      const eps = 23.439 * DEG;
+      const x = Math.cos(beta) * Math.cos(lambda), y = Math.cos(beta) * Math.sin(lambda), z = Math.sin(beta);
+      const ra = Math.atan2(y * Math.cos(eps) - z * Math.sin(eps), x);
+      const dec = Math.asin(y * Math.sin(eps) + z * Math.cos(eps));
+      // Equatorial to Earth-fixed: longitude is right ascension minus Greenwich sidereal time.
+      const gmst = (280.46061837 + 360.98564736629 * ((realDate - J2000) / 86400000)) * DEG;
+      return latLonToVector(dec, ra - gmst);
+    }
+    // The moon's density map: a bright disc pocked with craters, drawn once. The large dark maria
+    // sit on the near side (u around 0.25, the face lookAt points at Earth), as on the real moon,
+    // so the tidally locked face is recognizable.
+    const moonTex = (() => {
+      const c = document.createElement('canvas'); c.width = 512; c.height = 256;
+      const g = c.getContext('2d');
+      g.fillStyle = '#FFFFFF'; g.fillRect(0, 0, c.width, c.height);
+      let seed = 7;
+      const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+      const spot = (u, v, r, shade) => { g.fillStyle = shade; g.beginPath(); g.arc(u * c.width, v * c.height, r, 0, Math.PI * 2); g.fill(); };
+      for (let i = 0; i < 7; i++) spot(0.12 + rnd() * 0.26, 0.25 + rnd() * 0.45, 25 + rnd() * 30, '#8C8C8C');
+      for (let i = 0; i < 60; i++) spot(rnd(), rnd(), 3 + rnd() * 10, '#7A7A7A');
+      const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+    })();
+    // The moon is lit only by the sun, through its own shader, so the scene's ambient and
+    // camera fill lights (which keep the Earth's night side visible) do not wash out its phase.
+    // Its night side gets a faint earthshine: sunlight bounced off the Earth, from the Earth's direction.
+    const EARTHSHINE = 0.1;
+    const moonLitMat = new THREE.ShaderMaterial({
+      uniforms: { map: { value: moonTex }, sunDir: { value: new THREE.Vector3(0, 0, 1) }, earthDir: { value: new THREE.Vector3(0, 0, 1) }, earthshine: { value: EARTHSHINE } },
+      vertexShader: `
+        varying vec3 vNormalW; varying vec2 vUv;
+        void main() {
+          vNormalW = normalize(mat3(modelMatrix) * normal); vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }`,
+      fragmentShader: `
+        uniform sampler2D map; uniform vec3 sunDir; uniform vec3 earthDir; uniform float earthshine;
+        varying vec3 vNormalW; varying vec2 vUv;
+        void main() {
+          vec3 n = normalize(vNormalW);
+          float light = max(dot(n, sunDir), 0.0) * 1.3 + max(dot(n, earthDir), 0.0) * earthshine;
+          gl_FragColor = vec4(texture2D(map, vUv).rgb * light, 1.0);
+        }`,
+    });
+    // Red channel 7 * CLASS_STEP selects the moon's palette entry; green 0 means no city lights.
+    const moonClassMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(7 * CLASS_STEP / 255, 0, 0) });
+    const moon = new THREE.Mesh(new THREE.SphereGeometry(MOON_R, 48, 32), moonLitMat);
+    globe.add(moon);
+    const moonEpoch = Date.now();
+    const moonWorld = new THREE.Vector3();
+    function placeMoon() {
+      const now = Date.now(), simulated = moonEpoch + (now - moonEpoch) * MOON_SPEEDUP;
+      moon.position.copy(moonDirection(simulated, now).multiplyScalar(MOON_ORBIT));
+      moon.lookAt(0, 0, 0);   // tidally locked: the same face always points at Earth
+      // Feed the shader the sun's direction and the Earth's direction, both in world space.
+      // The globe's spin moves the sun in world space, so this is refreshed every frame.
+      sun.getWorldPosition(moonLitMat.uniforms.sunDir.value).normalize();
+      moon.getWorldPosition(moonWorld);
+      moonLitMat.uniforms.earthDir.value.copy(moonWorld).negate().normalize();
+    }
+    placeMoon();
+    // Apollo 11's flag at Tranquility Base, on the side that faces Earth: a blue dot and a red
+    // stripe, drawn over the cell the site projects to whenever that cell shows the moon's
+    // lit surface facing the camera. In the moon's own frame lookAt points +z at Earth.
+    const FLAG_LOCAL = new THREE.Vector3(Math.sin(23.5 * DEG), Math.sin(0.7 * DEG), Math.cos(23.5 * DEG)).normalize().multiplyScalar(MOON_R);
+    const flagPos = new THREE.Vector3(), flagNormal = new THREE.Vector3(), toCam = new THREE.Vector3();
+    function drawFlag() {
+      moon.localToWorld(flagPos.copy(FLAG_LOCAL));
+      moon.getWorldPosition(moonWorld);
+      flagNormal.subVectors(flagPos, moonWorld);
+      toCam.subVectors(camera.position, flagPos);
+      if (flagNormal.dot(toCam) <= 0) return;   // the site is on the far side from the camera
+      flagPos.project(camera);
+      const x = Math.floor((flagPos.x + 1) / 2 * cols), y = Math.floor((1 - flagPos.y) / 2 * rows);
+      if (x < 0 || x + 1 >= cols || y < 0 || y >= rows) return;
+      const i = ((rows - 1 - y) * cols + x) * 4;
+      // Only where the cell actually shows the moon (not hidden behind the Earth) and the surface is lit.
+      if (Math.round(cbuf[i] / CLASS_STEP) !== MOON_CLASS || buf[i] + buf[i + 1] + buf[i + 2] === 0) return;
+      ctx.fillStyle = '#000000'; ctx.fillRect(x * cellW, y * cellH, cellW * 2, cellH);
+      ctx.fillStyle = '#5B7CFF'; ctx.fillText('.', x * cellW, y * cellH);
+      ctx.fillStyle = '#FF4A4A'; ctx.fillText('=', (x + 1) * cellW, y * cellH);
+    }
 
     // Orientation lives in a quaternion so the globe can turn on any axis.
     // Start tilted 23.4 degrees with the Pacific facing the camera.
@@ -191,7 +305,6 @@
     let dragging = false, lastX = 0, lastY = 0, lastT = 0, idleUntil = 0, dirty = true;
     updateSun();
     setInterval(updateSun, 60 * 1000);
-    const AUTO = reduced ? 0 : 0.0024;
     const DRAG = 0.008;
     const RAMP_MS = 2500;   // time for the idle spin to reach full speed after a drag
     const PAUSE_MS = 300;   // quiet moment after releasing before the ramp begins
@@ -224,9 +337,20 @@
       nameRow = Math.floor(rows / 2);
       nameCol = Math.floor((cols - NAME.length) / 2);
       camera.aspect = (cols * cellW) / (rows * cellH);
-      // Fit the globe (diameter 2) inside the narrower axis with a little margin.
+      // Fit the globe (diameter 2) plus the moon's orbit inside the narrower axis with a little
+      // margin. The orbit can lie at any angle to the screen, so fit the whole sphere it sweeps,
+      // including the extra reach the moon has in perspective when it is nearest the camera.
       const halfFov = (camera.fov / 2) * Math.PI / 180;
-      camera.position.set(0, 0, 2.9 / (2 * Math.tan(halfFov) * Math.min(camera.aspect, 1)));
+      const narrow = Math.min(camera.aspect, 1);
+      let half = 1.45;
+      for (let pass = 0; pass < 2; pass++) {
+        const dist = half / (Math.tan(halfFov) * narrow);
+        half = 1.45;
+        for (let a = 0; a < 2 * Math.PI; a += 0.05) {
+          half = Math.max(half, dist * (MOON_ORBIT * Math.cos(a) + MOON_R + 0.06) / (dist - MOON_ORBIT * Math.sin(a)));
+        }
+      }
+      camera.position.set(0, 0, half / (Math.tan(halfFov) * narrow));
       camera.lookAt(0, 0, 0);
       camera.updateProjectionMatrix();
       renderer.setSize(cols, rows, false);
@@ -240,12 +364,12 @@
 
     function draw() {
       // Pass 1: lit globe, gives the character for each cell.
-      globe.material = litMat;
+      globe.material = litMat; moon.material = moonLitMat;
       renderer.setRenderTarget(rt);
       renderer.render(scene, camera);
       renderer.readRenderTargetPixels(rt, 0, 0, cols, rows, buf);
       // Pass 2: unlit class map, gives the color for each cell.
-      globe.material = classMat;
+      globe.material = classMat; moon.material = moonClassMat;
       renderer.render(scene, camera);
       renderer.readRenderTargetPixels(rt, 0, 0, cols, rows, cbuf);
       renderer.setRenderTarget(null);
@@ -282,9 +406,14 @@
             }
           }
           if (nameIdx >= 0) {
-            // The letter takes the color of the cell beneath it, white where there is no globe.
-            nameColors[nameIdx] = onGlobe ? color : '#FFFFFF';
-            c = ' ';
+            // The name sits on the Earth, so a moon passing in front covers it: the cell keeps the
+            // moon's character (or stays dark on the moon's night side) and the letter is skipped.
+            if (Math.round(cbuf[i] / CLASS_STEP) === MOON_CLASS) nameColors[nameIdx] = null;
+            else {
+              // The letter takes the color of the cell beneath it, white where there is no globe.
+              nameColors[nameIdx] = onGlobe ? color : '#FFFFFF';
+              c = ' ';
+            }
           }
           if (color !== runColor && run.trim() !== '') {
             ctx.fillStyle = runColor; ctx.fillText(run, runStart * cellW, y * cellH);
@@ -295,10 +424,11 @@
         }
         if (run.trim() !== '') { ctx.fillStyle = runColor; ctx.fillText(run, runStart * cellW, y * cellH); }
       }
+      drawFlag();
       ctx.font = fontBold;
       for (let k = 0; k < NAME.length; k++) {
-        if (NAME[k] === ' ') continue;
-        ctx.fillStyle = nameColors[k] || '#FFFFFF';
+        if (NAME[k] === ' ' || !nameColors[k]) continue;
+        ctx.fillStyle = nameColors[k];
         ctx.fillText(NAME[k], (nameCol + k) * cellW, nameRow * cellH);
       }
     }
@@ -318,6 +448,7 @@
           if (rate > 0) { globe.rotateY(rate); dirty = true; }
         }
       }
+      if (!reduced) { placeMoon(); dirty = true; }
       if (dirty) { draw(); dirty = false; savePose(false); }
     }
 
